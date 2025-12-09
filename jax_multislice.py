@@ -33,10 +33,9 @@ def move_probe(probe, new_pos):
     return jnp.roll(probe, shift, axis=(0, 1))
 
 
-def get_frequencies(shape, sampling):
-    n, m = shape
-    fx = jnp.fft.fftfreq(n, sampling[0])
-    fy = jnp.fft.fftfreq(m, sampling[1])
+def get_frequencies(n, m, ps):
+    fx = jnp.fft.fftfreq(n, ps[0])
+    fy = jnp.fft.fftfreq(m, ps[1])
     Fx, Fy = jnp.meshgrid(fx, fy, indexing='ij')
     return Fx, Fy
 
