@@ -74,6 +74,63 @@ def angular_spectrum_propagation_kernel(n: int,
     return H
 
 
+def wpm_propagation_kernel(Ek, n_val, k0, k_perp2, dz):
+    # Calculate the longitudinal wave vector component
+    # kz = sqrt((n * k0)^2 - k_perp^2)
+    kz = jnp.sqrt(jnp.array(n_val**2 * k0**2 - k_perp2, dtype=jnp.complex128))
+    H = jnp.exp(1j * dz * kz)
+    return jnp.fft.ifft2(H * Ek)
+
+
+def wpm_step(wave, n_map, dz, energy, ps):
+    """
+    WPM step *without* using unique(n). One ifft2 per pixel's refractive index.
+
+    Args:
+        wave: complex array (ny, nx)
+        n_map: refractive index map (ny, nx)
+        dz: propagation distance
+        energy: beam energy in eV
+        ps: pixel size (dy, dx)
+    """
+    ny, nx = wave.shape
+    wavelength = energy2wavelength(energy)
+    k0 = 2 * jnp.pi / wavelength
+
+    # Frequencies -> k_perp^2
+    Fy, Fx = get_frequencies(ny, nx, ps)
+    kx = 2 * jnp.pi * Fx
+    ky = 2 * jnp.pi * Fy
+    k_perp2 = kx**2 + ky**2
+
+    # One FFT of the input wave
+    Ek = jnp.fft.fft2(wave)
+
+    # Flatten refractive index map to list of values
+    n_flat = n_map.reshape(-1)
+
+    # For each refractive index value, propagate the *whole* field
+    # fields has shape (P, ny, nx)
+    fields = jax.vmap(
+        lambda n_val: wpm_propagation_kernel(Ek, n_val, k0, k_perp2, dz)
+    )(n_flat)
+
+    P = n_flat.size
+    p_indices = jnp.arange(P)
+    iy, ix = jnp.divmod(p_indices, nx) # each p -> (iy[p], ix[p])
+
+    # For each pixel p, pick the value at (iy[p], ix[p]) from its field
+    def pick_pixel(field, y, x):
+        return field[y, x]
+
+    new_wave_flat = jax.vmap(pick_pixel)(fields, iy, ix)   # (P,)
+
+    # Reshape back to (ny, nx)
+    new_wave = new_wave_flat.reshape(ny, nx)
+
+    return new_wave
+
+
 @jax.jit
 def Propagator(u, H):
     ufft = jnp.fft.fft2(u)
@@ -81,9 +138,27 @@ def Propagator(u, H):
 
 
 @jax.jit
-def transmission_function(array, energy):
+def transmission_function(potential, energy):
     sigma = energy2sigma(energy)
-    return jnp.exp(1j * sigma * array)
+    return jnp.exp(1j * sigma * potential)
+
+
+def electron_refractive_index(potential, energy):
+    E0 = electron_rest_energy()
+    E = energy
+
+    # Convert electrostatic potential (V) -> potential energy V (eV)
+    # Electron charge = -1, so potential energy = -phi
+    V = -potential
+
+    EminusV = E - V
+
+    numerator = 2 * EminusV * E0 + EminusV**2
+    denominator = 2 * E * E0 + E**2
+
+    n = jnp.sqrt(numerator / denominator)
+
+    return n
 
 
 def get_abtem_transmit(potential, energy):
@@ -169,7 +244,18 @@ def energy2wavelength(energy: float) -> float:
         / jnp.sqrt(energy * (2 * units._me * units._c**2 / units._e + energy))
         / units._e
         * 1.0e10
-    ).astype(jnp.float32)
+    )
+
+
+def electron_rest_energy():
+    """
+    Return the electron rest energy E0 = m_e c^2 in eV.
+    """
+    m_e = units._me
+    c = units._c
+    eV = units._e
+
+    return m_e * c**2 / eV
 
 
 @jdc.pytree_dataclass
