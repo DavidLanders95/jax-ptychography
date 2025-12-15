@@ -82,6 +82,44 @@ def wpm_propagation_kernel(Ek, n_val, k0, k_perp2, dz):
     return jnp.fft.ifft2(H * Ek)
 
 
+wpm_propagation_kernel_vmap = jax.vmap(wpm_propagation_kernel, in_axes=(None, 0, None, None, None))
+
+
+def make_k_damping_ramp(ny, nx, ps_y, ps_x, wavelength,
+                        theta_start=0.2, theta_end=0.24):
+    fy = jnp.fft.fftfreq(ny, d=ps_y)
+    fx = jnp.fft.fftfreq(nx, d=ps_x)
+    ky = (2 * jnp.pi) * fy[:, None]
+    kx = (2 * jnp.pi) * fx[None, :]
+    k_perp = jnp.sqrt(kx**2 + ky**2)
+
+    k0 = 2 * jnp.pi / wavelength
+    k_start = k0 * jnp.sin(theta_start)
+    k_end = k0 * jnp.sin(theta_end)
+
+    t = (k_perp - k_start) / (k_end - k_start + 1e-30)
+    t = jnp.clip(t, 0.0, 1.0)
+    ramp = 0.5 * (1.0 - jnp.cos(jnp.pi * t))  # smooth 0..1
+
+    return ramp, k_perp
+
+
+def wpm_propagation_kernel_damped(Ek, n_val, k0, k_perp2, dz, ramp,
+                                  damp_at_end=1e-2):
+    # Your usual kz
+    kz = jnp.sqrt(jnp.array(n_val**2 * k0**2 - k_perp2, dtype=jnp.complex128))
+
+    # Choose alpha_max so that at ramp=1 the per-step amplitude multiplier is damp_at_end
+    alpha_max = -jnp.log(damp_at_end) / dz
+    damp = jnp.exp(-dz * alpha_max * jnp.sqrt(ramp))
+
+    H = jnp.exp(1j * dz * kz) * damp
+    return jnp.fft.ifft2(H * Ek)
+
+
+wpm_propagation_kernel_damped_vmap = jax.vmap(wpm_propagation_kernel_damped, in_axes=(None, 0, None, None, None, None))
+
+
 def wpm_step(wave, n_map, dz, energy, ps):
     """
     WPM step *without* using unique(n). One ifft2 per pixel's refractive index.
@@ -92,6 +130,7 @@ def wpm_step(wave, n_map, dz, energy, ps):
         dz: propagation distance
         energy: beam energy in eV
         ps: pixel size (dy, dx)
+        pow_edge: Power of the supergaussian for the boundary.
     """
     ny, nx = wave.shape
     wavelength = energy2wavelength(energy)
@@ -109,15 +148,15 @@ def wpm_step(wave, n_map, dz, energy, ps):
     # Flatten refractive index map to list of values
     n_flat = n_map.reshape(-1)
 
-    # For each refractive index value, propagate the *whole* field
+    # For each refractive index value, propagate the whole field
     # fields has shape (P, ny, nx)
-    fields = jax.vmap(
-        lambda n_val: wpm_propagation_kernel(Ek, n_val, k0, k_perp2, dz)
-    )(n_flat)
+    ramp, _ = make_k_damping_ramp(ny, nx, ps[0], ps[1], wavelength,
+                                  theta_start=0.24, theta_end=0.30)
+    fields = wpm_propagation_kernel_damped_vmap(Ek, n_flat, k0, k_perp2, dz, ramp)
 
     P = n_flat.size
     p_indices = jnp.arange(P)
-    iy, ix = jnp.divmod(p_indices, nx) # each p -> (iy[p], ix[p])
+    iy, ix = jnp.divmod(p_indices, nx)
 
     # For each pixel p, pick the value at (iy[p], ix[p]) from its field
     def pick_pixel(field, y, x):
@@ -129,6 +168,100 @@ def wpm_step(wave, n_map, dz, energy, ps):
     new_wave = new_wave_flat.reshape(ny, nx)
 
     return new_wave
+
+
+# --- 1. The Paper's Smoothstep Function ---
+def smoothstep(x):
+    """
+    Implements the smoothstep function from Eq. (1) of the paper.
+    p(z) = 3z^2 - 2z^3 for 0 < z < 1.
+    This creates a differentiable, smooth transition between bins.
+    """
+    # Clamp x to [0, 1] to handle values strictly inside/outside bins
+    x = jnp.clip(x, 0.0, 1.0)
+    return 3 * x**2 - 2 * x**3
+
+
+# --- 2. Adaptive/Polynomial Binning ---
+def get_polynomial_bins(n_min, n_max, n_bins, power=2.0):
+    """
+    Creates bin edges that are concentrated at the high end (atoms).
+
+    If power=1.0: Linear spacing (Standard).
+    If power=2.0: Quadratic spacing. Bins are dense at high n, sparse at low n.
+
+    This answers your request to have unique propagators for complex areas (atoms)
+    while grouping the simple background.
+    """
+    # Linear spacing from 0 to 1
+    t = jnp.linspace(0, 1, n_bins)
+
+    # Apply polynomial warping
+    # If we want density at high values: 1 - (1-t)^power
+    # If we want density at low values: t^power
+    # Assuming atoms have HIGHER index than background:
+    t_warped = t**power
+    return n_min + (n_max - n_min) * t_warped
+
+
+def wpm_step_adaptive(wave, n_map, dz, energy, ps, n_bins=256, power_spacing=2.0):
+    """
+    WPM step with Polynomial Binning and Paper-inspired Smoothstep masking.
+
+    Args:
+        wave: (ny, nx) complex field
+        n_map: (ny, nx) refractive index map
+        n_bins: Number of FFTs to run (tractability parameter)
+        power_spacing: 1.0 = equal bins. >1.0 = focus bins on high indices (atoms).
+    """
+    ny, nx = wave.shape
+    wavelength = energy2wavelength(energy)
+    k0 = 2 * jnp.pi / wavelength
+
+    # Frequency Grid
+    dy, dx = ps
+    ky = 2 * jnp.pi * jnp.fft.fftfreq(ny, d=dy)
+    kx = 2 * jnp.pi * jnp.fft.fftfreq(nx, d=dx)
+    Fx, Fy = jnp.meshgrid(kx, ky)
+    k_perp2 = Fx**2 + Fy**2
+
+    # 1. FFT Input
+    Ek = jnp.fft.fft2(wave)
+
+    # 2. Define Adaptive Bins
+    n_min, n_max = n_map.min(), n_map.max()
+
+    # Generate the reference "bin" values
+    # shape: (n_bins,)
+    n_refs = get_polynomial_bins(n_min, n_max, n_bins, power=power_spacing)
+
+    # 3. Compute Propagators (Batch FFT)
+    # This is the heavy calculation, done only n_bins times
+    # ramp, _ = make_k_damping_ramp(ny, nx, ps[0], ps[1], wavelength,
+    #                               theta_start=0.14, theta_end=0.20)
+    ref_fields = wpm_propagation_kernel_vmap(Ek, n_refs, k0, k_perp2, dz)
+
+    idx_R = jnp.searchsorted(n_refs, n_map)
+    idx_R = jnp.clip(idx_R, 1, n_bins - 1)  # Clamp to valid range
+    idx_L = idx_R - 1
+
+    # Gather the reference n values at left and right boundaries
+    n_L = n_refs[idx_L]
+    n_R = n_refs[idx_R]
+
+    # Calculate fractional weight w within the bin
+    # n_map = (1-w)*n_L + w*n_R  -->  w = (n_map - n_L) / (n_R - n_L)
+    denom = n_R - n_L
+    w_raw = (n_map - n_L) / jnp.where(denom == 0, 1.0, denom)
+
+    w = smoothstep(w_raw)
+
+    field_L = jnp.take_along_axis(ref_fields, idx_L[None, ...], axis=0).squeeze()
+    field_R = jnp.take_along_axis(ref_fields, idx_R[None, ...], axis=0).squeeze()
+
+    new_wave = (1 - w) * field_L + w * field_R
+
+    return new_wave, w, idx_L, n_refs
 
 
 @jax.jit
@@ -300,3 +433,14 @@ def make_probe_fft(pp: ProbeParamsVariable, fpp: ProbeParamsFixed):
     probe_fft /= jnp.linalg.norm(probe_fft)
     return probe_fft
 
+
+def simple_fwhm(y):
+
+    half_max = np.max(y) / 2.0
+
+    indices = np.where(y > half_max)[0]
+
+    if len(indices) < 2:
+        return 0.0
+
+    return indices[-1] - indices[0]
