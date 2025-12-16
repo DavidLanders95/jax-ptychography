@@ -1,0 +1,288 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Your Paper}
+\author{You}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multislice simulation is the de-facto method for simulating the electron beam interaction with a sample in transmission electron microscopy (TEM). 
+The workhorse of the multislice method is the Fresnel propagator, which is justified as a propagation solution of the paraxial Schrodinger equation. 
+However, in cases such as when the sample or detector is tilted to a large angle relative to the electron beam, the paraxial approximation may no longer 
+be sufficiently accurate. We explore alternative solutions based around the non-paraxial Schrodinger equation solved via the Rayleigh Sommerfeld 
+propagator for single slice and arbitrary sample and detector tilts, the angular spectrum method for arbitrary sample tilts, and the Wave Propagation Method.
+\end{abstract}
+
+\section{Introduction}
+For the simulation of typical beam-sample interactions (perpendicular plane wave TEM illumination, or STEM probe illumination) in the electron microscope, the traditional multislice propagation method has become 
+the go to workhorse \cite{cowley1957scattering, kirkland2010advanced}. It's range of accuracy of approximately ~7 degrees stems from the fact that the Fresnel Propagator which solves free space propagation 
+in the multislice method is itself derived from a taylor expansion of the non-paraxial free space propagation kernel of the Rayleigh Sommerfeld diffraction integral. The taylor expansion of the rayleigh sommerfeld
+propagator converts spherical waves to parabolic waves, whose accuracy degrades with increasing angle from the optical axis, and at 7 degrees the error is approximately X\% (\emph{citation needed}), 
+deemed outside the range of acceptable accuracy for most electron microscopy applications. Therefore, must forward multislice simulations assume small angle scattering.
+
+In section one, we explore alternative propagation solutions that are accurate beyond the paraxial approximation. The first non-paraxial method relies on a Fourier space solution to the Rayleigh Sommerfeld diffraction integral, the angular spectrum of plane waves. 
+The second method relies upon the wave propagation method, which is an operator solution to the Helmholtz wave equation, and is accurate up to 85 degrees. It's drawbacks 
+are that not for each unique refractive index (potential) value within the sample, a unique propagator, and thus unique Fourier transform must be performed, making it computationally expensive for 
+samples with a wide range of refractive index or potential values. 
+
+
+
+\section{Relativistic Dirac Equation and the approximated Klein-Gordon Equation}
+
+As described by \cite{RotherScheerschmidt2009}, the relativistic Dirac equation is the starting point for the most accurate description of high-energy electron scattering:
+
+\begin{equation}
+E\boldsymbol{\Psi}(\vec{r}) = [c\vec{\alpha} \cdot \hat{\vec{p}} + mc^2\beta + V(\vec{r})]\boldsymbol{\Psi}(\vec{r}),
+\label{eq:dirac}
+\end{equation}
+
+where $E$ denotes the energy, $c$ the velocity of light, $m$ the rest mass of the electron, $V$ the electrostatic potential, $\vec{\alpha}$ and $\beta$ the Dirac matrices, 
+$\hat{\vec{p}}$ the momentum operator and $\vec{r}$ the three-dimensional space coordinate. A solution to equation~\eqref{eq:dirac} above was used by \cite{RotherScheerschmidt2009} 
+as a "ground-truth" numerical baseline to establish the accuracy of the relativistically corrected Schrodinger equation solved via the multislice method. In their work,
+they noted that the spin effects and the $V^2$ term that the Schrodinger wave equation neglects were negligible for typical TEM imaging conditions. However, 
+for samples that contained high angle scattering components, such as a gold sample orienteted along a zone-axis, the relativistically corrrected Schrodinger equation
+solved via the multislice method began to deviate from the Dirac equation solution. This is not surprising given that the multislice solution 
+is normally solved as a so-called split step fourier method, which decouples the potential interaction and free space propagation, and as a consequence
+the wavelength of the electron is never modiified during the propagation step through the sample. Secondly, the multislice method
+is usually solved via the Fresnel propagator, accurate for small angle scattering up to seven degrees from the beam axis. 
+
+\cite{RotherScheerschmidt2009} solution to the Dirac equation overcomes the approximations of the multislice solution 
+by framing \eqref{eq:dirac} as a set of four coupled differential equations, and solves each via numerical integration. 
+Although this solution is accurate to high angles, it is computationally expensive, and cannot make use 
+of the efficiency of fast fourier transforms as in the multislice method. As a result, the inclusion of thermal vibrations 
+via the frozen phonon method becomes prohibitively expensive to include for typical TEM simulation sizes.
+
+In order to investigate non-paraxial solutions to the relativistically corrrected Schrodinger equation that overcome the approximations above, 
+it is insightful to first write the Time Dependent Dirac equation and it's approximations in a form that is comparable to the Helmholtz wave equation in optics, 
+which is of the form:
+
+\begin{equation}
+\label{eq:helmholtz}
+\nabla^2 u + k^2 n^2(\mathbf{r}) u = 0.
+\end{equation}
+
+with $u$ the wave function, $k$ the wave number in vacuum, and $n(\mathbf{r})$ the refractive index distribution of the medium.
+
+Starting from the Time Independent Dirac equation:
+
+\begin{equation}
+\label{eq:dirac_timeindep}
+\left[ c \vec{\alpha} \cdot \hat{\vec{p}} + \beta mc^2 + V \right] \psi = E \psi
+\end{equation}
+
+by applying the operator $\left( c \vec{\alpha} \cdot \hat{\vec{p}} \right)$, and performing some algebraic manipulations, we arrive at:
+
+\begin{equation}
+\label{eq:dirac_helmholtz}
+\nabla^2 \psi + k_0^2 n^2(\mathbf{r}) \psi = - \frac{i}{\hbar c} (\vec{\alpha} \cdot \nabla V) \psi
+\end{equation}
+
+where
+
+$k_0 = \frac{\sqrt{E^2 - m^2c^4}}{\hbar c}$ represents the vacuum wave number, and $n(\mathbf{r}) = \sqrt{\frac{(E-V)^2 - m^2c^4}{E^2 - m^2c^4}}$ is the effective refractive index of the medium.
+
+From this Helmholtz like representation, it is straight forward to arrive at the Klein-Gordon equation by setting the $\alpha$ matrices to zero ignoring the effects of spin, 
+
+\begin{equation}
+\label{eq:klein_gordon}
+\nabla^2 \psi + k_0^2 n^2(\mathbf{r}) \psi = \nabla^2 \psi + \frac{(E - V)^2 - m^2c^4}{\hbar^2 c^2} \psi = 0.
+\end{equation}
+
+The relativistically correct Schrodinger equation arises from the Klein-Gordon equation by assuming that the potential $V$ 
+is small compared to the total energy $E$ of the electron, and that when $(E - V)^2$ is expanded, the $V^2$ term can be neglected giving:
+
+\begin{equation}
+\label{eq:rel_schrodinger}
+\nabla^2 \Psi + \left[ \frac{E^2 - m^2 c^4}{\hbar^2 c^2} - \frac{2\gamma m V}{\hbar^2} \right] \Psi = 0
+\end{equation}
+
+Finally, we can write \cite{eq:rel_schrodinger} with the usual interaction constant $\sigma = \frac{2\gamma m}{\hbar^2 k_0}$ as:
+
+\begin{equation}
+\label{eq:rel_schrodinger_interaction}
+\nabla^2 \Psi + k_0^2 (1 - \sigma V) \Psi = 0
+\end{equation}
+
+
+Writing equation \eqref{eq:dirac} in it's Helmholtz form \eqref{eq:dirac_helmholtz} allows us clearly to see the relationship between the Time Independent Dirac equation and it's approximatons,
+and the classical Helmholtz wave equation in optics. Understanding the connections in this way allos us to directly apply non-paraxial propagation methods from optics to electron microscopy.
+
+\begin{table}[h]
+\centering
+\label{tab:helmholtz_versions}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Equation} & \textbf{Helmholtz Form} & \textbf{Refractive Index} ($n(\mathbf{r})$) \\
+\hline
+Dirac & $\nabla^2 \psi + k_0^2 n^2 \psi = - \frac{i}{\hbar c} (\vec{\alpha} \cdot \nabla V) \psi$ & $\sqrt{\frac{(E-V)^2 - m^2c^4}{E^2 - m^2c^4}}$ \\
+\hline
+Klein-Gordon & $\nabla^2 \psi + k_0^2 n^2 \psi = 0$ & $\sqrt{\frac{(E-V)^2 - m^2c^4}{E^2 - m^2c^4}}$ \\
+\hline
+Rel. Schrödinger & $\nabla^2 \psi + k_0^2 n^2 \psi = 0$ & $\sqrt{1 - \sigma V}$ \\
+\hline
+\end{tabular}
+\caption{Helmholtz versions of quantum mechanics equations. The vacuum wave number is defined as $k_0 = \frac{\sqrt{E^2 - m^2c^4}}{\hbar c}$.}
+\end{table}
+
+
+
+
+
+
+
+
+With the assumption that the electromagnetic potential $V$ and the magnetic vector potential $\vec{A}$ are periodic, \cite{RotherScheerschmidt2009} 
+derive a set of four coupled ordinary differential equations to solve the Dirac equation provided the wave function at the input plane is known.
+
+\begin{equation}
+\label{eq:dirac_coupled}
+\frac{\partial\boldsymbol{\Psi}(\vec{G},z)}{\partial z} = -\mathrm{i}\alpha_z \left( \vec{\alpha}_{\vec{R}} \cdot \left( \vec{G} - \frac{1}{\hbar}\vec{A}_{\vec{R}}(\vec{G},z)\otimes \right) - \frac{1}{\hbar}\alpha_z \cdot A_z(\vec{G},z) \otimes + \frac{mc\beta}{\hbar} - \frac{E}{c\hbar} + \frac{1}{c\hbar}V(\vec{G},z)\otimes \right) \boldsymbol{\Psi}(\vec{r}).
+\end{equation}
+
+A numerical solution to \cite{eq:dirac_coupled} provides the most accurate description of non-paraxial, relativistically correct electron scattering and is used as a 
+benchmark for the wide angle solution to the approximated Klein-Gordon equation described in the next section. 
+
+\section{Approximated Klein-Gordon Equation and the Helmholtz Wave Equation}
+
+Starting again from the Dirac equation \eqref{eq:dirac}, ignoring the electron spin and assuming that the electrostatic potential $V$ is small compared to the total 
+energy $E$ of the electron, i.e $V \ll E$, one can derive the approximated Klein-Gordon equation (a.k.a the relativisticaly corrected Time independent Schr\"odinger equation) where both the rest mass 
+($m \rightarrow \gamma m_0$) and wavelength ($\lambda$) of the electron are relativistically corrected, and the wave function is no longer a spinor, but simply a scalar function $\Psi$
+
+\begin{equation}
+\left[\frac{E^2 - m^2c^4}{2\gamma mc^2}\right]\Psi = \left[\frac{\hat{\vec{p}}^2}{2\gamma m} + V\right]\Psi = \left[-\frac{\hbar^2\Delta}{2\gamma m} + V\right]\Psi.
+\end{equation}
+
+For a high-energy electron in a static potential $V(\mathbf{r})$, the time-independent Schr\"odinger equation can be written as follows:
+
+\[
+\left[-\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf r)\right]\psi(\mathbf r)
+= E \psi(\mathbf r).
+\]
+
+With an the many body interaction of quantum mechanics ignored, and treating the potential as a scalar function of the system, we can directly 
+compare this non-paraxial Schr\"odinger equation to the Helmholtz equation in optics, 
+and find that the electrostatic potential $V(\mathbf{r})$ plays the role of a refractive index distribution. Such a remark is important, as it allows us to directly apply non-paraxial 
+propagation methods from optics to electron microscopy.
+In order to derive the angular spectrum propagator, we can set the potential to zero, $V(\mathbf r) = 0$, yielding the free-space Schrödinger equation:
+
+Starting from the free-space Schrödinger equation
+\[
+(\nabla^2 + k^2)\psi(\mathbf r)=0,\qquad 
+k^2=\frac{2mE}{\hbar^2},
+\]
+a 2D Fourier transform in the transverse coordinates yields
+\[
+\left[\partial_z^2 + k^2 - q^2\right]\tilde\psi(\mathbf q,z)=0,
+\qquad k_z(\mathbf q)=\sqrt{k^2 - q^2}.
+\]
+The forward-propagating solution is
+\[
+\tilde\psi(\mathbf q,z)=\tilde\psi(\mathbf q,0)\,e^{i k_z(\mathbf q) z},
+\]
+and inverting the transform gives the angular spectrum representation
+\[
+\psi(\mathbf r_\perp,z)
+= \frac{1}{(2\pi)^2}\!
+\iint \tilde\psi(\mathbf q,0)\,
+e^{i(\mathbf q\cdot\mathbf r_\perp + k_z(\mathbf q) z)}\,d^2 q.
+\]
+
+The angular spectrum propagator can be solved efficiently using two Fast Fourier Transforms, similar to the Fresnel propagator. 
+The main difference is that the propagation kernel is no longer approximated as a parabolic wave, but propagates plane waves in Fourier Space, amounting to 
+a sum of spherical waves in real space, thus accurately modelling any high angle components of the interaction between the incoming wavefront and the refractive 
+index distribution of the sample. One should note that the sampling requirements of the angular spectrum method are more stringent than that of the Fresnel propagator,
+as high angle scattering components require a finer sampling in real space to avoid aliasing effects in Fourier space. 
+
+In order to explore initially if there is any difference between solving scattering in the multislice method with the Fresnel Propagator, the Angular Spectrum Propagator, or the WPM,
+we simulate for 200kV and Plane wave indicence a representative light and heavy atom, Carbon and Gold, respectively.
+
+\begin{tikzpicture}[
+  node distance=1.2cm,
+  box/.style={
+    rectangle, draw, rounded corners,
+    align=center,
+    text width=9cm,
+    minimum height=1.25cm
+  }
+]
+
+% Top node: Schr → Helmholtz via effective refractive index
+\node[box, inner sep=8pt] (helm) {%
+    \textbf{Helmholtz Wave Equation for single particle and mean-field potential}\\[6pt]
+    $\displaystyle \left[\nabla^2 + k_0^2 n^2(\mathbf r)\right] u(\mathbf r) = 0$\\[6pt]
+    where the effective electron refractive index $n(\mathbf r)$ is:\\[4pt]
+    $\displaystyle n(\mathbf r)= \sqrt{ \frac{ 2(E-V(\mathbf r))E_0 + (E-V(\mathbf r))^2 }{ 2EE_0 + E^2 } }$
+};
+
+\node[box, below=of helm, inner sep=8pt] (wpm) {%
+    \textbf{Wave Propagation Method (WPM)}\\[6pt]
+    Local Refractive Index–Dependent Angular Spectrum Propagation:\\[4pt]
+    $\displaystyle u(x,y,z+\Delta z) = \sum_m I_m^z(x,y)\,
+        \mathcal{F}^{-1}\!\left[
+            e^{\,i k_z^{(m)}\Delta z}\,
+            \mathcal{F}\{u(x,y,z)\}
+        \right]$\\[6pt]
+    with $\displaystyle k_z^{(m)}=\sqrt{k_0^2 n_m^2 - k_x^2 - k_y^2}$\\[4pt]
+    \textit{Wide-angle - Unique Propagation per unique Refractive Index}
+};
+
+\node[box, below=of wpm, inner sep=8pt] (pmsft) {%
+    \textbf{Angular Spectrum Multislice (ASMS)}\\[6pt]
+    Split-step Angular Spectrum Propagation:\\[4pt]
+    $\displaystyle u(x,y,z+\Delta z)=
+        \mathcal{F}^{-1}\!\left[
+            e^{i k_z\Delta z}\,
+            \mathcal{F}\left\{ u(x,y,z) \, e^{\,i k_0(n(x,y,z)-1)\Delta z} \right\}
+        \right]$\\[6pt]
+    with $\displaystyle k_z = \sqrt{k_0^2 - k_x^2 - k_y^2}$\\[4pt]
+    \textit{Wide-angle - Single Propagation per slice}
+};
+
+\node[box, below=of pmsft, inner sep=8pt] (msft) {%
+    \textbf{Fresnel Multislice (FMS)}\\[6pt]
+    Split-step Fresnel Propagation:\\[4pt]
+    $\displaystyle u(x,y,z+\Delta z)=
+        \mathcal{F}^{-1}\!\left[
+            e^{i \Delta z (k_0 - \frac{k_\perp^2}{2k_0})}\,
+            \mathcal{F}\left\{ u(x,y,z) \, e^{\,i k_0(n(x,y,z)-1)\Delta z} \right\}
+        \right]$\\[6pt]
+    with $\displaystyle k_\perp^2 = k_x^2 + k_y^2$\\[4pt]
+    \textit{Paraxial - Single Propagation per slice}
+};
+
+% Left arrow (Accuracy)
+\draw[->, very thick]
+        ([xshift=-5cm]msft.south) --
+        node[midway, sloped, above]{\Large More Complex}
+        ([xshift=-5cm]helm.north);
+
+% Right arrow (Complexity)
+\draw[->, very thick]
+        ([xshift=5cm]helm.north) --
+        node[midway, sloped, above]{\Large Less Accurate}
+        ([xshift=5cm]msft.south);
+
+
+\end{tikzpicture}
+
+
+
+\end{document}
