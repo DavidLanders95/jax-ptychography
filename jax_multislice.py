@@ -236,9 +236,6 @@ def wpm_step_adaptive(wave, n_map, dz, energy, ps, n_bins=256, power_spacing=2.0
     n_refs = get_polynomial_bins(n_min, n_max, n_bins, power=power_spacing)
 
     # 3. Compute Propagators (Batch FFT)
-    # This is the heavy calculation, done only n_bins times
-    # ramp, _ = make_k_damping_ramp(ny, nx, ps[0], ps[1], wavelength,
-    #                               theta_start=0.14, theta_end=0.20)
     ref_fields = wpm_propagation_kernel_vmap(Ek, n_refs, k0, k_perp2, dz)
 
     idx_R = jnp.searchsorted(n_refs, n_map)

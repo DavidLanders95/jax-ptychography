@@ -1,17 +1,12 @@
 \documentclass{article}
-
-% Language setting
-% Replace `english' with e.g. `spanish' to change the document language
 \usepackage[english]{babel}
-
-
-% Set page size and margins
-% Replace `letterpaper' with `a4paper' for UK/EU standard size
 \usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
 % Useful packages
 \usepackage{amsmath}
 \usepackage{graphicx}
+\graphicspath{{../wpm/}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
@@ -54,23 +49,29 @@ E\boldsymbol{\Psi}(\vec{r}) = [c\vec{\alpha} \cdot \hat{\vec{p}} + mc^2\beta + V
 \end{equation}
 
 where $E$ denotes the energy, $c$ the velocity of light, $m$ the rest mass of the electron, $V$ the electrostatic potential, $\vec{\alpha}$ and $\beta$ the Dirac matrices, 
-$\hat{\vec{p}}$ the momentum operator and $\vec{r}$ the three-dimensional space coordinate. A solution to equation~\eqref{eq:dirac} above was used by \cite{RotherScheerschmidt2009} 
-as a "ground-truth" numerical baseline to establish the accuracy of the relativistically corrected Schrodinger equation solved via the multislice method. In their work,
-they noted that the spin effects and the $V^2$ term that the Schrodinger wave equation neglects were negligible for typical TEM imaging conditions. However, 
-for samples that contained high angle scattering components, such as a gold sample orienteted along a zone-axis, the relativistically corrrected Schrodinger equation
-solved via the multislice method began to deviate from the Dirac equation solution. This is not surprising given that the multislice solution 
-is normally solved as a so-called split step fourier method, which decouples the potential interaction and free space propagation, and as a consequence
-the wavelength of the electron is never modiified during the propagation step through the sample. Secondly, the multislice method
-is usually solved via the Fresnel propagator, accurate for small angle scattering up to seven degrees from the beam axis. 
+$\hat{\vec{p}}$ the momentum operator and $\vec{r}$ the three-dimensional space coordinate. A solution to equation~\eqref{eq:dirac} was used by \cite{RotherScheerschmidt2009} 
+as a "ground-truth" numerical baseline to establish the accuracy of the multislice solution to the relativistically corrected Schrodinger equation. In their work,
+they demonstrated that:
 
-\cite{RotherScheerschmidt2009} solution to the Dirac equation overcomes the approximations of the multislice solution 
-by framing \eqref{eq:dirac} as a set of four coupled differential equations, and solves each via numerical integration. 
-Although this solution is accurate to high angles, it is computationally expensive, and cannot make use 
-of the efficiency of fast fourier transforms as in the multislice method. As a result, the inclusion of thermal vibrations 
-via the frozen phonon method becomes prohibitively expensive to include for typical TEM simulation sizes.
+1. The spin effects of the dirac equation are mostly negligible to the error in amplitude of a central and high angle beam scattered through a thick sample of gold.
 
-In order to investigate non-paraxial solutions to the relativistically corrrected Schrodinger equation that overcome the approximations above, 
-it is insightful to first write the Time Dependent Dirac equation and it's approximations in a form that is comparable to the Helmholtz wave equation in optics, 
+2. The taylor expansion that is applied to the $E^2 - V^2$ term, to enable one to use the simple relationship $\sigma * V$, 
+where $\sigma$ is the so called interaction constant given by: 
+$$
+\sigma = \frac{2\pi m e \lambda}{h^2}
+$$  does not contribute a significant error to the solution of the wave equation. 
+
+However, for a diffracted beam at 135 mrad, and scattering through a thick sample of gold, they found a divergence between the multislice solution solved via a split step fourier method with the Fresnel propagator,
+and a "ground-truth" ODE solution to the approximated Klein-Gordon (a.k.a relativistically corrected Schrodinger Wave Equation), Klein-Gordon, and Dirac equation.
+They explain the discrepancy by the fact that the multislice solution linearises the second order term in the wave equation,
+$d^2 \psi / dz^2$, by assuming that the wave function can be written as a slowly varying envelope modulating a fast oscillating term along the beam propagation direction $z$.
+Furthermore, we note that the multislice solution ignores the change of wavelength of the electron as it propagates through a potential $V(\mathbf{r})$, since MS splits up the potential interaction and free space propagation steps.
+We cannot also overcome these limitations of the multislice method by just solving the wave equation in an ODE form, as it normally requires a periodic potential, and the slow speed of an ODE solution to the wave equation does not lend itself to repeated simulations over many frozen phonon configurations to include thermal vibrations,
+which has become a standard requirement to include thermal diffuse scattering in TEM simulations. A method that is both accurate to high angles, and can leverage the efficieny of the fast fourier transform
+is thus desirable to overcome these limitations.
+
+In order to investigate non-paraxial solutions to the relativistically corrrected Schrodinger equation that can leverage the efficiency of the fast fourier transform, 
+it is insightful to write the Dirac, Klein-Gordon, and approximated Klein-Gordon in the same framework as a Time-Independent Helmholtz like wave equation.
 which is of the form:
 
 \begin{equation}
@@ -120,9 +121,8 @@ Finally, we can write \cite{eq:rel_schrodinger} with the usual interaction const
 \nabla^2 \Psi + k_0^2 (1 - \sigma V) \Psi = 0
 \end{equation}
 
-
 Writing equation \eqref{eq:dirac} in it's Helmholtz form \eqref{eq:dirac_helmholtz} allows us clearly to see the relationship between the Time Independent Dirac equation and it's approximatons,
-and the classical Helmholtz wave equation in optics. Understanding the connections in this way allos us to directly apply non-paraxial propagation methods from optics to electron microscopy.
+and the classical Helmholtz wave equation in optics. Understanding the connections in this way allos us to directly apply non-paraxial propagation methods from optics community to electron microscopy.
 
 \begin{table}[h]
 \centering
@@ -142,77 +142,146 @@ Rel. Schrödinger & $\nabla^2 \psi + k_0^2 n^2 \psi = 0$ & $\sqrt{1 - \sigma V}$
 \caption{Helmholtz versions of quantum mechanics equations. The vacuum wave number is defined as $k_0 = \frac{\sqrt{E^2 - m^2c^4}}{\hbar c}$.}
 \end{table}
 
+\section{Wave Propagation Method}
+The Wave Propagation Method (WPM) is a numerical method for solving the Helmholtz wave equation in the forward scattering approximation, that was introduced by \cite{Brenner1994}, and has been demonstrated 
+to be accurate up to 85 degrees from the optical axis \cite{????}. A systematic derivation of the wave propagation method from the Helmholtz wave equation is given by \cite{Schmidt}. For conciseness
+we present a summary of the derivation here:
 
+Starting with the scalar Helmholtz equation for the wavefunction $\psi$ in a medium with a z-dependent refractive index $n$:
 
+$$(\partial_z^2 + \nabla_\perp^2 + k_0^2 n^2(x,y,z)) \psi = 0$$
 
+By neglecting back-scattering (the "one-way" wave approximation), 
+the evolution of the wavefunction is governed by the square-root operator:
 
+$$\partial_z \psi = i \sqrt{\nabla_\perp^2 + k_0^2 n^2} \cdot \psi$$
 
+which has a solution according to: 
 
+$$\psi(x,y, z+\Delta z) = e^{i \sqrt{\nabla_\perp^2 + k_0^2 n^2} \Delta z} \psi(x,y,z)$$
 
-With the assumption that the electromagnetic potential $V$ and the magnetic vector potential $\vec{A}$ are periodic, \cite{RotherScheerschmidt2009} 
-derive a set of four coupled ordinary differential equations to solve the Dirac equation provided the wave function at the input plane is known.
-
-\begin{equation}
-\label{eq:dirac_coupled}
-\frac{\partial\boldsymbol{\Psi}(\vec{G},z)}{\partial z} = -\mathrm{i}\alpha_z \left( \vec{\alpha}_{\vec{R}} \cdot \left( \vec{G} - \frac{1}{\hbar}\vec{A}_{\vec{R}}(\vec{G},z)\otimes \right) - \frac{1}{\hbar}\alpha_z \cdot A_z(\vec{G},z) \otimes + \frac{mc\beta}{\hbar} - \frac{E}{c\hbar} + \frac{1}{c\hbar}V(\vec{G},z)\otimes \right) \boldsymbol{\Psi}(\vec{r}).
-\end{equation}
-
-A numerical solution to \cite{eq:dirac_coupled} provides the most accurate description of non-paraxial, relativistically correct electron scattering and is used as a 
-benchmark for the wide angle solution to the approximated Klein-Gordon equation described in the next section. 
-
-\section{Approximated Klein-Gordon Equation and the Helmholtz Wave Equation}
-
-Starting again from the Dirac equation \eqref{eq:dirac}, ignoring the electron spin and assuming that the electrostatic potential $V$ is small compared to the total 
-energy $E$ of the electron, i.e $V \ll E$, one can derive the approximated Klein-Gordon equation (a.k.a the relativisticaly corrected Time independent Schr\"odinger equation) where both the rest mass 
-($m \rightarrow \gamma m_0$) and wavelength ($\lambda$) of the electron are relativistically corrected, and the wave function is no longer a spinor, but simply a scalar function $\Psi$
+From this point, one can derive the typical multislice solution (denoted Beam Propagation Methods (BPMs) in optics literature) by applying various approximations to the square root operator.
+Standard multislice approximates this square root by splitting the Laplacian ($\nabla_\perp^2$) and refractive index ($n^2$) terms. 
+WPM, however, solves the propagation step $\Delta z$ using a more rigorous Fourier Integral formulation:
 
 \begin{equation}
-\left[\frac{E^2 - m^2c^4}{2\gamma mc^2}\right]\Psi = \left[\frac{\hat{\vec{p}}^2}{2\gamma m} + V\right]\Psi = \left[-\frac{\hbar^2\Delta}{2\gamma m} + V\right]\Psi.
+\label{eq:wpm_propagation}
+\psi(x,y, z+\Delta z) = \frac{1}{2\pi} \iint \tilde{\psi}(k_x, k_y, z) e^{i \sqrt{k_0^2 n^2(x,y) - k_\perp^2} \Delta z} e^{i(k_x x + k_y y)} dk_x dk_y
 \end{equation}
 
-For a high-energy electron in a static potential $V(\mathbf{r})$, the time-independent Schr\"odinger equation can be written as follows:
+Here, $\tilde{\psi}$ is the Fourier transform of the wavefunction. 
+
+Crucially, the longitudinal wavevector $k_z = \sqrt{k_0^2 n^2 - k_\perp^2}$ 
+is dependent on both real space coordinates ($x,y$) and reciprocal space coordinates ($k_x, k_y$), and includes any modification to the wavelength 
+inside the medium via the refractive index $n(x,y)$.
+
+Equation \eqref{eq:wpm_propagation} can take advantage of the Fast Fourier Transform (FFT) for efficient computation
+
+\begin{equation}
+\psi(x,y, z+\Delta z) = \mathcal{F}^{-1} \left[ e^{i k_z(x,y) \Delta z} \cdot \mathcal{F} \{ \psi(x,y,z) \} \right]
+\end{equation} and is implemented in a slice-by-slice manner akin to multislice. When the refractive index is constant across the transverse plane, WPM reduces to the Angular Spectrum of Plane waves method 
+of propagation.
+
+Although the WPM is accurate to high angles, its main drawback is that for each unique refractive index value in the slice, a unique propagator must be computed. Without any modification, 
+the order of computational complexity is $O(N^{2D})$ where N is the number of grid points, and D is the number of transverse dimensions. Such a computational cost is prohibitive, as a 
+an object slice that is discretised into for example 100 x 100 pixels, and has a unique refractive index value at each pixel, would require 10,000 unique Fourier transforms per slice for one propagation step.
+
+\cite{Schmidt} proposed a modification to the WPM that reduces the computational complexity from $O(N^{2D})$ to $O(M N^D \log N)$, where M is the number of "unique refractive" index values in the slice. 
+By applying a mask $I_m(x,y)$ that selects pixels with the same refractive index $n_m$, the propagation step can be written as a sum over M unique propagations. However, in the case of electron microscopy multislice
+this algorithm poses two problems: First, applying a mask to the propagator negates the possibility to differentiate through the propagation step, which is a neccessary requirement to use the WPM as a forward model 
+to solve inverse problems via gradient descent, as is the case in ptychography. Second, in the case of electron microscopy, the refractive index is continuous function of the potential $V(\mathbf{r})$, and thus
+there are usually not very many "unique" refractive index values in a slice. \cite{2025paper which creates a differential WPM} attempted to overcome both of these problems by introducing a 
+continuous binning step in a binary refractive index medium. 
+
+At this point it is pertininent to highlight why one cannot simply use the Angular Spectrum Method (ASM) to reintroduce high angular scattering into the multislice formulation. In the process of deriving the multislice equation, 
+one must linearise the square root operator in the propagation step by splitting the Laplacian and refractive index terms. This process is performed by taylor expanding the square root operator, and neglecting higher order terms.
+This linearisation step is what introduces the paraxial approximation into the multislice method, and thus prevents the ASM multislice method from being accurate at high angles. The WPM however, does not require this linearisation step, and thus retains high angle accuracy.
+In order to reintroduce higher angle propagation in the split-step multislice propagation framework, one must retain higher order terms in the taylor expansion of the operator, and in the optics literature these methods are known as wide-angle or Padé approximants. As 
+far as the author is aware, these wide-angle multislice methods have not been applied to electron microscopy simulations.
+
+\section{Binning of refractive index values for efficient WPM multislice}
+
+Inspired by their implementation, we have adapted the WPM multislice algorithm to use a refractive index binning strategy 
+which can handle the continuous nature of the refractive index in electron microscopy multislice potentials.
+
+We discretize the refractive index range $[n_{\mathrm{min}}, n_{\mathrm{max}}]$ of the current slice into $N_{\mathrm{bins}}$ discrete reference values, denoted as 
+$\{n_{\mathrm{ref}}^{(k)}\}_{k=1}^{N_{\mathrm{bins}}}$.
+
+In a typical multislice potential, many of the refractive index values will be very close to $1$ (vacuum region), while the refractive index values of an atom 
+will concentrate in a narrow range slightly above $1$. Since there are likely to be many more refractive index values near the value of the vacuum region, 
+we employ a quadratic distribution for the reference indices rather than using linearly spaced bins in order to allocate more bins near $n=1$.
+The reference indices are distributed according to a quadratic function determined by the parameter $\gamma$, with $\gamma=2.0$ for quadratic spacing: 
 
 \[
-\left[-\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf r)\right]\psi(\mathbf r)
-= E \psi(\mathbf r).
+n_{\mathrm{ref}}^{(k)} = n_{\mathrm{min}} + (n_{\mathrm{max}} - n_{\mathrm{min}}) \left( \frac{k}{N_{\mathrm{bins}}-1} \right)^\gamma
 \]
 
-With an the many body interaction of quantum mechanics ignored, and treating the potential as a scalar function of the system, we can directly 
-compare this non-paraxial Schr\"odinger equation to the Helmholtz equation in optics, 
-and find that the electrostatic potential $V(\mathbf{r})$ plays the role of a refractive index distribution. Such a remark is important, as it allows us to directly apply non-paraxial 
-propagation methods from optics to electron microscopy.
-In order to derive the angular spectrum propagator, we can set the potential to zero, $V(\mathbf r) = 0$, yielding the free-space Schrödinger equation:
+which allows for denser binning near the vacuum refractive index when $\gamma > 1$.
 
-Starting from the free-space Schrödinger equation
+Next, for a propagation step $\Delta z$, we compute a bank of propagated fields $u_k(x,y)$. Each field $u_k$ corresponds to the 
+diffraction of the input field $u_{\mathrm{in}}(x,y)$ assuming a homogeneous medium with refractive index $n_{\mathrm{ref}}^{(k)}$. 
+This is performed efficiently via batch FFT operations using the angular spectrum kernel:
+
 \[
-(\nabla^2 + k^2)\psi(\mathbf r)=0,\qquad 
-k^2=\frac{2mE}{\hbar^2},
-\]
-a 2D Fourier transform in the transverse coordinates yields
-\[
-\left[\partial_z^2 + k^2 - q^2\right]\tilde\psi(\mathbf q,z)=0,
-\qquad k_z(\mathbf q)=\sqrt{k^2 - q^2}.
-\]
-The forward-propagating solution is
-\[
-\tilde\psi(\mathbf q,z)=\tilde\psi(\mathbf q,0)\,e^{i k_z(\mathbf q) z},
-\]
-and inverting the transform gives the angular spectrum representation
-\[
-\psi(\mathbf r_\perp,z)
-= \frac{1}{(2\pi)^2}\!
-\iint \tilde\psi(\mathbf q,0)\,
-e^{i(\mathbf q\cdot\mathbf r_\perp + k_z(\mathbf q) z)}\,d^2 q.
+u_k(x,y) = \mathcal{F}^{-1} \left( \mathcal{F}(u_{\mathrm{in}}) e^{i \Delta z \sqrt{(k_0 n_{\mathrm{ref}}^{(k)})^2 - k_x^2 - k_y^2}} \right)
 \]
 
-The angular spectrum propagator can be solved efficiently using two Fast Fourier Transforms, similar to the Fresnel propagator. 
-The main difference is that the propagation kernel is no longer approximated as a parabolic wave, but propagates plane waves in Fourier Space, amounting to 
-a sum of spherical waves in real space, thus accurately modelling any high angle components of the interaction between the incoming wavefront and the refractive 
-index distribution of the sample. One should note that the sampling requirements of the angular spectrum method are more stringent than that of the Fresnel propagator,
-as high angle scattering components require a finer sampling in real space to avoid aliasing effects in Fourier space. 
+To evaluate the field at a specific spatial coordinate $(x,y)$ where the local refractive index is $n(x,y)$, 
+we identify the two bounding reference bins such that $n_L \le n(x,y) < n_R$, where $n_L, n_R \in \{n_{\mathrm{ref}}^{(k)}\}$. 
+We propose a differentiable interpolation scheme, by defining a local interpolation weight 
 
-In order to explore initially if there is any difference between solving scattering in the multislice method with the Fresnel Propagator, the Angular Spectrum Propagator, or the WPM,
-we simulate for 200kV and Plane wave indicence a representative light and heavy atom, Carbon and Gold, respectively.
+\[
+w_{\mathrm{raw}} = \frac{n(x,y) - n_L}{n_R - n_L}, \quad w_{\mathrm{raw}} \in [0, 1]
+\]
+
+To ensure smooth gradients and minimize discretization artifacts, we map this linear weight through a smoothstep activation function $S(w)$, 
+similar to the spatial partitioning technique demonstrated by \cite{Barré and Brunel} via a cubic Hermite interpolation function:
+
+\[
+w = S(w_{\mathrm{raw}}) = 3w_{\mathrm{raw}}^2 - 2w_{\mathrm{raw}}^3
+\]
+While linear interpolation would satisfy the requirement for differentiability, it could result in discontinuities in the gradient at the bin boundaries in a gradient based optimisation scheme.
+
+The final field at the next step $u(x,y, z+\Delta z)$ is computed as the weighted superposition of the fields 
+propagated at the bounding indices: 
+
+\[
+u(x,y) = (1 - w) \cdot u_L(x,y) + w \cdot u_R(x,y)
+\]
+
+This formulation ensures that the propagation model is fully differentiable with respect to the refractive index map $n(x,y)$, enabling inverse reconstruction of potentials via automatic differentiation,
+and that only a limited number of FFTs (equal to $N_{\mathrm{bins}}$) are required per propagation step, significantly reducing the computational cost compared to a naive WPM implementation. 
+The accuracy of this binned WPM multislice method depends on the number of bins $N_{\mathrm{bins}}$ chosen and will change on a case by case basis depending on the refractive index distribution of the sample. 
+One can mitigate concern about this potential source of error by performing a test simulation, and doubling the number of bins until no difference is observed in the output wavefunction. 
+
+In general, the WPM will need a GPU for efficient computation, and we have found that $N_{\mathrm{bins}}$ between 64 and 512 was sufficient for the simulations presented in this work.
+This is a marked improvement on the naive case, as it enables the WPM simulation to compute a forward simulation with many slices and a larger pixel size of $512 \times 512$, or $1024 \times 1024$ pixels 
+in a reasonable time frame (seconds to minutes).
+
+\section{Verification of WPM multislice accuracy at high angles}
+To verify the accuracy of our WPM multislice implementation, we have recreated the simulation presented in figure 3 of \cite{RotherScheerschmidt2009}, 
+which compares the amplitude of a central and high angle (135 mrad) diffracted beam after propagation through a thick gold sample.
+We can see that for the central beam, all methods (MS, and WPM) agree. For the high angle beam,
+at 135 mrad, the amplitude of the diffracted MS solutions deviates from the "ground truth" ODE solution as the thickness of the unit-cell increases. However, the WPM 
+solution follows the trend of the ground truth ODE solution more closely, demonstrating that the WPM is more accurate at high angles than the traditional MS method, while maintaining the 
+efficiency and larger step size of the FFT based multislice method (with two slices per unit-cell), provided one can use a GPU for computation of the many FFTs required per slice.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{Au_beam_amplitudes}
+    \caption{Recreation of figure 3 in \cite{RotherScheerschmidt2009} showing the amplitude of the central and high angle (135 mrad) diffracted beams, 
+             after propagation with our multislice and wave propagation methods. Plotted in green is the "ground truth" ODE solution, and the multi-slice solution
+             of to the Klein-Gordon equation. In blue is the Angular Spectrum Multislice (ASMS) solution and the Wave Propagation Method (WPM) solution}
+    \label{fig:au_beam_amplitudes}
+\end{figure}
+
+\section{Thick Sample Comparison of WPM and MS in STEM simulation}
+In order to test the WPM multislice method in a more realistic scenario, we have performed a STEM simulation of a thick sample of gold (100 nm), 
+tilted at 30 degrees relative to the incident electron beam. We compare the WPM multislice method to the traditional Fresnel multislice method. 
+One can 
+
+
 
 \begin{tikzpicture}[
   node distance=1.2cm,
@@ -230,55 +299,39 @@ we simulate for 200kV and Plane wave indicence a representative light and heavy 
     $\displaystyle \left[\nabla^2 + k_0^2 n^2(\mathbf r)\right] u(\mathbf r) = 0$\\[6pt]
     where the effective electron refractive index $n(\mathbf r)$ is:\\[4pt]
     $\displaystyle n(\mathbf r)= \sqrt{ \frac{ 2(E-V(\mathbf r))E_0 + (E-V(\mathbf r))^2 }{ 2EE_0 + E^2 } }$
+    \textit{Full Accuracy - Solved via Finite Element Methods unless approximated}
 };
 
 \node[box, below=of helm, inner sep=8pt] (wpm) {%
     \textbf{Wave Propagation Method (WPM)}\\[6pt]
-    Local Refractive Index–Dependent Angular Spectrum Propagation:\\[4pt]
-    $\displaystyle u(x,y,z+\Delta z) = \sum_m I_m^z(x,y)\,
+    Local refractive-index–dependent angular spectrum propagation:\\[4pt]
+    $\displaystyle u(x,y,z+\Delta z) =
         \mathcal{F}^{-1}\!\left[
             e^{\,i k_z^{(m)}\Delta z}\,
             \mathcal{F}\{u(x,y,z)\}
         \right]$\\[6pt]
     with $\displaystyle k_z^{(m)}=\sqrt{k_0^2 n_m^2 - k_x^2 - k_y^2}$\\[4pt]
-    \textit{Wide-angle - Unique Propagation per unique Refractive Index}
+    \textit{Wide-angle — unique propagator per refractive index}
 };
 
-\node[box, below=of wpm, inner sep=8pt] (pmsft) {%
-    \textbf{Angular Spectrum Multislice (ASMS)}\\[6pt]
-    Split-step Angular Spectrum Propagation:\\[4pt]
-    $\displaystyle u(x,y,z+\Delta z)=
-        \mathcal{F}^{-1}\!\left[
-            e^{i k_z\Delta z}\,
-            \mathcal{F}\left\{ u(x,y,z) \, e^{\,i k_0(n(x,y,z)-1)\Delta z} \right\}
-        \right]$\\[6pt]
-    with $\displaystyle k_z = \sqrt{k_0^2 - k_x^2 - k_y^2}$\\[4pt]
-    \textit{Wide-angle - Single Propagation per slice}
-};
-
-\node[box, below=of pmsft, inner sep=8pt] (msft) {%
+\node[box, below=of wpm, inner sep=8pt] (msft) {%
     \textbf{Fresnel Multislice (FMS)}\\[6pt]
-    Split-step Fresnel Propagation:\\[4pt]
+    Split-step Fresnel propagation:\\[4pt]
     $\displaystyle u(x,y,z+\Delta z)=
         \mathcal{F}^{-1}\!\left[
-            e^{i \Delta z (k_0 - \frac{k_\perp^2}{2k_0})}\,
+            e^{i \Delta z \left(k_0 - \frac{k_\perp^2}{2k_0}\right)}\,
             \mathcal{F}\left\{ u(x,y,z) \, e^{\,i k_0(n(x,y,z)-1)\Delta z} \right\}
         \right]$\\[6pt]
     with $\displaystyle k_\perp^2 = k_x^2 + k_y^2$\\[4pt]
-    \textit{Paraxial - Single Propagation per slice}
+    \textit{Paraxial — single propagator per slice}
 };
 
-% Left arrow (Accuracy)
-\draw[->, very thick]
-        ([xshift=-5cm]msft.south) --
-        node[midway, sloped, above]{\Large More Complex}
-        ([xshift=-5cm]helm.north);
+% Left and right vertical arrows (use a fixed horizontal offset so arrows run outside the boxes)
+\draw[->, very thick, >=stealth]
+    ([xshift=-5cm]msft.south) -- ([xshift=-5cm]helm.north) node[midway, left]{\Large More Complex};
 
-% Right arrow (Complexity)
-\draw[->, very thick]
-        ([xshift=5cm]helm.north) --
-        node[midway, sloped, above]{\Large Less Accurate}
-        ([xshift=5cm]msft.south);
+\draw[->, very thick, >=stealth]
+    ([xshift=5cm]helm.north) -- ([xshift=5cm]msft.south) node[midway, right]{\Large Less Accurate};
 
 
 \end{tikzpicture}
