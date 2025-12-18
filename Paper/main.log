@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2024.8.8)  17 DEC 2025 17:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2024.8.8)  18 DEC 2025 14:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -535,64 +535,83 @@ Package hyperref Info: Link coloring ON on input line 17.
 
 
 
-LaTeX Warning: Citation `cowley1957scattering' on page 1 undefined on input line 30.
+LaTeX Warning: Citation `cowley1957scattering' on page 1 undefined on input line 34.
 
 
-LaTeX Warning: Citation `kirkland2010advanced' on page 1 undefined on input line 30.
+LaTeX Warning: Citation `kirkland2010advanced' on page 1 undefined on input line 34.
 
 
-LaTeX Warning: Citation `RotherScheerschmidt2009' on page 1 undefined on input line 44.
+LaTeX Warning: Citation `RotherScheerschmidt2009' on page 1 undefined on input line 41.
 
 
-LaTeX Warning: Citation `RotherScheerschmidt2009' on page 1 undefined on input line 52.
+LaTeX Warning: Citation `????' on page 1 undefined on input line 49.
+
+
+LaTeX Warning: Citation `Brenner1994' on page 1 undefined on input line 52.
+
+
+LaTeX Warning: Citation `????' on page 1 undefined on input line 54.
+
+
+LaTeX Warning: Citation `Schmidt' on page 1 undefined on input line 55.
 
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 
-LaTeX Warning: Citation `eq:rel_schrodinger' on page 2 undefined on input line 117.
+LaTeX Warning: Citation `RotherScheerschmidt2009' on page 2 undefined on input line 62.
+
+
+LaTeX Warning: Citation `RotherScheerschmidt2009' on page 2 undefined on input line 70.
 
 [2]
 
-LaTeX Warning: Citation `Brenner1994' on page 3 undefined on input line 146.
+LaTeX Warning: Citation `eq:rel_schrodinger' on page 3 undefined on input line 136.
 
 
-LaTeX Warning: Citation `????' on page 3 undefined on input line 147.
+LaTeX Warning: Citation `Brenner1994' on page 3 undefined on input line 166.
 
 
-LaTeX Warning: Citation `Schmidt' on page 3 undefined on input line 147.
+LaTeX Warning: Citation `????' on page 3 undefined on input line 167.
+
+
+LaTeX Warning: Citation `Schmidt' on page 3 undefined on input line 167.
 
 [3]
 
-LaTeX Warning: Citation `Schmidt' on page 4 undefined on input line 189.
+LaTeX Warning: Citation `Schmidt' on page 4 undefined on input line 209.
 
 
-LaTeX Warning: Citation `2025paper which creates a differential WPM' on page 4 undefined on input line 193.
+LaTeX Warning: Citation `2025paper which creates a differential WPM' on page 4 undefined on input line 213.
+
+
+LaTeX Warning: Citation `2025_paper' on page 4 undefined on input line 225.
 
 [4]
 
-LaTeX Warning: Citation `Barré and Brunel' on page 5 undefined on input line 238.
+LaTeX Warning: Citation `Barré and Brunel' on page 5 undefined on input line 259.
 
+[5]
 
-LaTeX Warning: Citation `RotherScheerschmidt2009' on page 5 undefined on input line 262.
+LaTeX Warning: Citation `RotherScheerschmidt2009' on page 6 undefined on input line 283.
 
-<../wpm/Au_beam_amplitudes.pdf, id=79, 1148.86906pt x 352.34511pt>
+<../wpm/Au_beam_amplitudes.pdf, id=87, 1148.86906pt x 352.34511pt>
 File: ../wpm/Au_beam_amplitudes.pdf Graphic file (type pdf)
 <use ../wpm/Au_beam_amplitudes.pdf>
-Package pdftex.def Info: ../wpm/Au_beam_amplitudes.pdf  used on input line 272.
+Package pdftex.def Info: ../wpm/Au_beam_amplitudes.pdf  used on input line 294.
 (pdftex.def)             Requested size: 443.57848pt x 136.04306pt.
 
-LaTeX Warning: Citation `RotherScheerschmidt2009' on page 5 undefined on input line 275.
+LaTeX Warning: Citation `RotherScheerschmidt2009' on page 6 undefined on input line 297.
 
 
-LaTeX Warning: Citation `RotherScheerschmidt2009' on page 5 undefined on input line 275.
+LaTeX Warning: Citation `RotherScheerschmidt2009' on page 6 undefined on input line 297.
 
 
-Overfull \hbox (47.46046pt too wide) in paragraph at lines 337--338
+Overfull \hbox (47.46046pt too wide) in paragraph at lines 359--360
 [][] 
  []
 
-[5] [6 <../wpm/Au_beam_amplitudes.pdf>] (./main.aux)
+[6 <../wpm/Au_beam_amplitudes.pdf>] [7] (./main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -605,18 +624,18 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 42140D7A8000F72F0D6227F861E9EC6E;1747.
  ) 
 Here is how much of TeX's memory you used:
- 21135 strings out of 476080
- 393170 string characters out of 5792745
- 1939975 words of memory out of 5000000
- 42794 multiletter control sequences out of 15000+600000
- 566547 words of font info for 65 fonts, out of 8000000 for 9000
+ 21142 strings out of 476080
+ 393233 string characters out of 5792745
+ 1941975 words of memory out of 5000000
+ 42797 multiletter control sequences out of 15000+600000
+ 567385 words of font info for 68 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,11n,93p,641b,668s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on main.pdf (6 pages, 273656 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
+Output written on main.pdf (7 pages, 309442 bytes).
 PDF statistics:
- 233 PDF objects out of 1000 (max. 8388607)
- 130 compressed objects within 2 object streams
- 24 named destinations out of 1000 (max. 500000)
+ 260 PDF objects out of 1000 (max. 8388607)
+ 148 compressed objects within 2 object streams
+ 25 named destinations out of 1000 (max. 500000)
  66 words of extra memory for PDF output out of 10000 (max. 10000000)
 
