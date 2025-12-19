@@ -291,6 +291,20 @@ def electron_refractive_index(potential, energy):
     return n
 
 
+def electron_refractive_index_taylor(potential, energy):
+    E0 = electron_rest_energy()
+    E = energy
+
+    # The interaction constant factor derived from Taylor expansion:
+    # (E + E0) / (E * (E + 2*E0))
+    interaction_factor = (E + E0) / (E * (E + 2 * E0))
+
+    # n = 1 + sigma_factor * potential
+    n = 1.0 + interaction_factor * potential
+
+    return n
+
+
 def get_abtem_transmit(potential, energy):
     t_functions = []
     for _, potential_configuration in _generate_potential_configurations(
