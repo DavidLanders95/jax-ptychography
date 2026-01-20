@@ -1,8 +1,8 @@
 # Fdb version 4
-["pdflatex"] 1766063738.55389 "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" "main.pdf" "main" 1766063739.53816 0
-  "../wpm/Au_beam_amplitudes.pdf" 1765981537.37678 23398 43ef8d88c3267f2614303eddc9ec2599 ""
+["pdflatex"] 1768926949.77413 "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" "main.pdf" "main" 1768926950.77298 0
+  "../wpm/Au_beam_amplitudes.pdf" 1768926948.48071 23347 36742e05cbefade42f2e287c3eb327cd ""
   "/etc/texmf/web2c/texmf.cnf" 1723130536.00682 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" 1766063736.74036 25998 0800832498bf061a9631e47edc0a2e41 ""
+  "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" 1768924049.9135 25998 0800832498bf061a9631e47edc0a2e41 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1246382020 1120 1e8878807317373affa7f7bba4cf2f6a ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy7.tfm" 1246382020 1120 7f9f170e8aa57527ad6c49feafd45d54 ""
@@ -178,9 +178,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1723130681.70983 5353513 5ed5862036d4682a97b92bdbb24a70e8 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1723130750 6837962 1ecb84dd045c7e95dc614e70cd0e5c1e ""
-  "main.aux" 1766063739.40429 4014 f1e994698440b9b70a90479461d9f15f "pdflatex"
-  "main.out" 1766063739.40706 1747 42140d7a8000f72f0d6227f861e9ec6e "pdflatex"
-  "main.tex" 1766063736.74036 25998 0800832498bf061a9631e47edc0a2e41 ""
+  "main.aux" 1768926950.64002 4014 f1e994698440b9b70a90479461d9f15f "pdflatex"
+  "main.out" 1768926950.643 1747 42140d7a8000f72f0d6227f861e9ec6e "pdflatex"
+  "main.tex" 1768924049.9135 25998 0800832498bf061a9631e47edc0a2e41 ""
   (generated)
   "main.aux"
   "main.log"
