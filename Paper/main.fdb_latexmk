@@ -1,9 +1,10 @@
 # Fdb version 4
-["pdflatex"] 1768926949.77413 "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" "main.pdf" "main" 1768926950.77298 0
-  "../wpm/Au_beam_amplitudes.pdf" 1768926948.48071 23347 36742e05cbefade42f2e287c3eb327cd ""
+["pdflatex"] 1768986879.00529 "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" "main.pdf" "main" 1768986880.02366 0
+  "../wpm/Au_beam_amplitudes.pdf" 1768986194.60251 23347 3c2d0632943eef8f24a167fdfb5d0c57 ""
   "/etc/texmf/web2c/texmf.cnf" 1723130536.00682 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" 1768924049.9135 25998 0800832498bf061a9631e47edc0a2e41 ""
+  "/home/dl277493/Documents/Code/jax-pytchography/jax-ptychography/Paper/main.tex" 1768986878.63062 29468 7f0d8a85cd864accdf590be160d7758b ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
+  "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1246382020 1120 1e8878807317373affa7f7bba4cf2f6a ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy7.tfm" 1246382020 1120 7f9f170e8aa57527ad6c49feafd45d54 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -175,12 +176,14 @@
   "/usr/share/texlive/texmf-dist/tex/latex/url/url.sty" 1388531844 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty" 1700082560 55487 80a65caedd3722f4c20a14a69e785d8f ""
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
+  "/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1636152094 2900 1537cc8184ad1792082cd229ecc269f4 ""
+  "/usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb" 1636152094 138258 6525c253f16cededa14c7fd0da7f67b2 ""
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1723130681.70983 5353513 5ed5862036d4682a97b92bdbb24a70e8 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1723130750 6837962 1ecb84dd045c7e95dc614e70cd0e5c1e ""
-  "main.aux" 1768926950.64002 4014 f1e994698440b9b70a90479461d9f15f "pdflatex"
-  "main.out" 1768926950.643 1747 42140d7a8000f72f0d6227f861e9ec6e "pdflatex"
-  "main.tex" 1768924049.9135 25998 0800832498bf061a9631e47edc0a2e41 ""
+  "main.aux" 1768986879.88086 5629 f4e5a4d60d39b8f64b5e0fc0cef6b275 "pdflatex"
+  "main.out" 1768986879.88386 2203 75e7a1e4de208ce1497abc9c3c7a3553 "pdflatex"
+  "main.tex" 1768986878.63062 29468 7f0d8a85cd864accdf590be160d7758b ""
   (generated)
   "main.aux"
   "main.log"

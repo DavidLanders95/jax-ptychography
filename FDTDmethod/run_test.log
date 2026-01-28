@@ -1,0 +1,7 @@
+Initializing CUDA Atomic Simulation (User Potential)...
+Run: N_FRAMES=50, STEPS_PER_FRAME=20, SNAPSHOT_COUNT=5
+Progress: 0 / 50 frames
+Progress: 20 / 50 frames
+Progress: 40 / 50 frames
+Saved 5 snapshots to snapshots.bin
+Saved final wavefunction to wavefunction.bin
